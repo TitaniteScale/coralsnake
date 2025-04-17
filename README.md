@@ -20,12 +20,12 @@ The language syntax is defined in [`docs/SYNTAX.md`](docs/SYNTAX.md). It uses in
 To parse a CoralSnake file and see the parsed structure and estimated materials:
 
 ```bash
-python coral_interpreter.py <your_file.dust>
+python coral.py <your_file.dust>
 ```
 
 Example:
 ```bash
-python coral_interpreter.py examples/clock.dust
+python coral.py examples/clock.dust
 ```
 
 ## Examples / Demos
