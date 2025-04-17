@@ -1,0 +1,19 @@
+# Simple Redstone Clock
+# Defines one cycle: ON -> delay -> OFF -> delay
+
+output clock_out
+var tick_delay = 10 # Use a variable
+
+def run_clock():
+    loop:
+        activate(clock_out)
+        delay(tick_delay)
+        deactivate(clock_out)
+        delay(tick_delay)
+
+# You would also need a way to start the execution, maybe:
+# call run_clock() # outside the def? Or assume first def runs?
+# The interpreter doesn't handle this yet.
+
+# NOTE: The CoralSnake syntax doesn't specify how to loop or repeat this cycle.
+# This function defines only a single ON/OFF sequence. 

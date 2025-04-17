@@ -1,0 +1,9 @@
+# Pushes a block with a piston when the button is pressed
+
+input button
+output piston
+
+def push_block():
+    if button:
+        activate(piston)
+
