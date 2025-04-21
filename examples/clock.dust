@@ -2,7 +2,7 @@
 # Defines one cycle: ON -> delay -> OFF -> delay
 
 output clock_out
-var tick_delay = 10 # Use a variable
+var tick_delay = 10 #Use a variable for delay
 
 def run_clock():
     loop:
@@ -16,4 +16,4 @@ def run_clock():
 # The interpreter doesn't handle this yet.
 
 # NOTE: The CoralSnake syntax doesn't specify how to loop or repeat this cycle.
-# This function defines only a single ON/OFF sequence. 
+# This function defines only a single ON/OFF sequence.

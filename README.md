@@ -28,6 +28,56 @@ Example:
 python coral.py examples/clock.dust
 ```
 
+## Getting Started
+
+To run the CoralSnake parser, make sure you have Python 3 installed. Then from your terminal:
+
+1. Install Python:
+   - Windows: Download and install from [Python.org](https://www.python.org/downloads/)
+   - Mac: Use Homebrew: `brew install python3`
+   - Linux: Python is usually pre-installed, or use: `sudo apt install python3`
+
+2. Download CoralSnake:
+   ```bash
+   # Clone the repository
+   git clone [REPO_URL]
+   
+   # Go into the project folder
+   cd coralsnake
+   ```
+
+3. You're ready to run CoralSnake!
+
+
+```bash
+python3 coral.py your_file.dust
+```
+
+This will display the parsed structure and an estimate of Redstone components needed.
+
+## VS Code Extension
+
+CoralSnake has an official [Visual Studio Code extension](https://marketplace.visualstudio.com/items?itemName=TitaniteScale.coralsnake) for syntax highlighting and language support.
+
+(Screenshot or icon will be added here.)
+
+To install:
+- Search for "CoralSnake" in the VS Code Extensions Marketplace, or
+- Install directly using the `.vsix` if downloaded locally.
+
+## Snippets
+
+**Example Code (clock.dust):**
+![The example illustrates clearly structured definitions for basic logical gates (AND, OR, XOR, NOT), demonstrating syntax highlighting and readability provided by the extension.](assets/code1.jpg)
+
+
+```
+
+**Interpreter Output:**
+```
+![Running coral.py to interpret examples/clock.dust shows the parsed structure and estimated materials needed](assets/output1.gif)
+
+
 ## Examples / Demos
 
 Basic examples can be found in the `examples/` directory.

@@ -1,0 +1,37 @@
+# CoralSnake Standard Library – Logic Gates
+# ----------------------------------------
+# Each gate takes named input signals and drives a single output signal.
+# Usage pattern:
+#
+#     input a, b
+#     output lamp
+#     call and_gate(a, b, lamp)
+#
+
+def and_gate(a, b, out):
+    # TRUE when *both* inputs are TRUE
+    if a and b:
+        activate(out)
+    else:
+        deactivate(out)
+
+def or_gate(a, b, out):
+    # TRUE when *any* input is TRUE
+    if a or b:
+        activate(out)
+    else:
+        deactivate(out)
+
+def not_gate(a, out):
+    # Inverts the input signal
+    if not a:
+        activate(out)
+    else:
+        deactivate(out)
+
+def xor_gate(a, b, out):
+    # TRUE when *exactly one* input is TRUE
+    if (a and not b) or (not a and b):
+        activate(out)
+    else:
+        deactivate(out)
