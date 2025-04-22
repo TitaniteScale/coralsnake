@@ -4,12 +4,13 @@
 
 CoralSnake is a simple Domain Specific Language (DSL) designed to describe Redstone logic in Minecraft. The goal is to write `.dust` files using CoralSnake syntax, and eventually have an interpreter generate step-by-step build instructions or schematics for the described contraption.
 
-## Current Status (v0.4 - Parser)
+## Current Status (v0.4 - Parsing & Execution)
 
-*   **Parsing:** The interpreter (`coral_interpreter.py`) can currently parse `.dust` files written using the defined syntax. It understands inputs, outputs, variables, function definitions, and various control flow/action statements (loops, conditions, delays, etc.).
-*   **Structure Output:** Running the interpreter prints a structured view of the parsed program, showing indentation and the sequence of commands.
-*   **Material Estimation:** The interpreter provides a basic estimate of the Redstone component types likely needed based on the commands used in the `.dust` file.
-*   **Execution:** **Execution logic (handling loops, conditions, state changes, timing) is NOT YET IMPLEMENTED.** The interpreter only parses the structure at this stage.
+*   **Parsing:** The interpreter (`coral.py`) now supports inputs, outputs, variables, parameterized functions (with parameters) and argument-passing in calls, along with control flow and action statements.
+*   **Standard Library:** You can define and call reusable functions across `.dust` files (e.g., logic gate libraries and imports).
+*   **Structure Output:** Prints a structured view of the parsed program with clear indentation and command sequencing.
+*   **Material Estimation:** Provides a basic estimate of required Redstone components based on the parsed commands.
+*   **Execution Notes:** Outputs execution notes showing function signatures, steps, and call arguments. Full simulation logic (state changes, loops, timing) is still under development.
 
 ## Syntax
 
@@ -39,9 +40,12 @@ To run the CoralSnake parser, make sure you have Python 3 installed. Then from y
 
 2. Download CoralSnake:
    ```bash
-   # Clone the repository
-   git clone [REPO_URL]
-   
+   # Clone the repository (HTTPS)
+   git clone https://github.com/TitaniteScale/coralsnake.git
+
+   # Or clone via SSH:
+   git clone git@github.com:TitaniteScale/coralsnake.git
+
    # Go into the project folder
    cd coralsnake
    ```
