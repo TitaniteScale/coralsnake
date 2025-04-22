@@ -59,7 +59,10 @@ This will display the parsed structure and an estimate of Redstone components ne
 
 CoralSnake has an official [Visual Studio Code extension](https://marketplace.visualstudio.com/items?itemName=TitaniteScale.coralsnake) for syntax highlighting and language support.
 
-(Screenshot or icon will be added here.)
+## Icon
+
+![CoralSnake Language Icon](assets/icon.png)
+
 
 To install:
 - Search for "CoralSnake" in the VS Code Extensions Marketplace, or
