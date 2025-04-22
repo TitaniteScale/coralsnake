@@ -14,10 +14,11 @@ def estimate_materials(program_data):
         materials.add("Redstone Dust")
         materials.add("Redstone Torch") # Torches often used in memory
 
-    for func_name, steps in program_data['functions'].items():
-        # steps is a list of dicts: {'cmd': ..., 'val': ..., 'indent': ..., 'line': ...}
+    for func_name, fdata in program_data['functions'].items():
+        # fdata has 'params' and 'steps'
+        steps = fdata.get('steps', [])
         for step in steps:
-            command = step['cmd']
+            command = step.get('cmd')
             if command in ['activate', 'deactivate']:
                 materials.add("Redstone Dust")
             elif command in ['delay', 'pulse']:

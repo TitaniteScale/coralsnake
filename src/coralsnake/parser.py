@@ -1,4 +1,5 @@
 import re
+import sys
 
 def parse_dust_lines(lines):
     """Parses cleaned lines from a .dust file into a structured program dictionary."""
@@ -6,9 +7,10 @@ def parse_dust_lines(lines):
         'inputs': [],
         'outputs': [],
         'global_vars': {},
-        'functions': {}
+        'functions': {} # function_name: {'params': [...], 'steps': [...]}
     }
     current_function = None
+    current_params = []
     warnings = [] # Collect syntax warnings
 
     # --- Pass 1: Parse declarations and function structure ---
@@ -23,6 +25,7 @@ def parse_dust_lines(lines):
         # --- Top-Level Declarations ---
         if current_indent == 0:
             current_function = None # Exit function context if we de-indent to 0
+            current_params = []
             if stripped_ln.startswith("input"):
                 parsed_program['inputs'].extend([x.strip() for x in stripped_ln[5:].split(",")])
             elif stripped_ln.startswith("output"):
@@ -31,31 +34,48 @@ def parse_dust_lines(lines):
                 match = re.match(r"var\s+(\w+)\s*(?:=\s*(.*))?", stripped_ln)
                 if match:
                     var_name, initial_value = match.groups()
-                    # Store initial value as string for now
                     parsed_program['global_vars'][var_name] = initial_value.strip() if initial_value else None
                 else:
                     warnings.append(f"L{line_num}: Malformed var declaration: {ln}")
             elif stripped_ln.startswith("def"):
-                match = re.match(r"def\s+(\w+)\s*\(\s*\)\s*:", stripped_ln)
+                match = re.match(r"def\s+(\w+)\s*\(([^)]*)\)\s*:", stripped_ln)
                 if match:
                     current_function = match.group(1)
+                    param_str = match.group(2).strip()
+                    params = [p.strip() for p in param_str.split(",") if p.strip()] if param_str else []
+                    current_params = params
                     if current_function in parsed_program['functions']:
-                         warnings.append(f"L{line_num}: Warning - Redefining function '{current_function}'")
-                    parsed_program['functions'][current_function] = [] # Initialize function step list
+                        warnings.append(f"L{line_num}: Warning - Redefining function '{current_function}'")
+                    parsed_program['functions'][current_function] = {'params': params, 'steps': []}
                 else:
                     warnings.append(f"L{line_num}: Malformed function definition: {ln}")
-            # Consider 'call' at top level? For now, only allow declarations.
-            elif not any(stripped_ln.startswith(kw) for kw in ["input", "output", "var", "def"]):
-                 warnings.append(f"L{line_num}: Unexpected statement outside function: {ln}")
+            elif stripped_ln.startswith("call"):
+                # Top-level call statements go into an implicit __main__ function
+                current_function = '__main__'
+                if current_function not in parsed_program['functions']:
+                    parsed_program['functions'][current_function] = {'params': [], 'steps': []}
+                match_call = re.match(r"call\s+(\w+)\s*\(([^)]*)\)", stripped_ln)
+                if match_call:
+                    call_name = match_call.group(1)
+                    arg_str = match_call.group(2).strip()
+                    args = [a.strip() for a in arg_str.split(',') if a.strip()] if arg_str else []
+                    parsed_program['functions'][current_function]['steps'].append({
+                        'cmd': 'call', 'val': {'name': call_name, 'args': args},
+                        'indent': 0, 'line': line_num
+                    })
+                else:
+                    warnings.append(f"L{line_num}: Malformed call statement: {ln}")
+            elif not any(stripped_ln.startswith(kw) for kw in ["input", "output", "var", "def", "call"]):
+                warnings.append(f"L{line_num}: Unexpected statement outside function: {ln}")
 
         # --- Statements inside Functions ---
         elif current_function:
             # Ensure the function exists (might fail on malformed def)
             if current_function not in parsed_program['functions']:
-                 warnings.append(f"L{line_num}: Statement found, but not inside a valid function definition: {ln}")
-                 continue # Skip this line if the function context is broken
+                warnings.append(f"L{line_num}: Statement found, but not inside a valid function definition: {ln}")
+                continue # Skip this line if the function context is broken
 
-            steps_list = parsed_program['functions'][current_function]
+            steps_list = parsed_program['functions'][current_function]['steps']
 
             # Actions
             m_act = re.match(r"activate\((\w+)\)", stripped_ln)
@@ -65,48 +85,50 @@ def parse_dust_lines(lines):
             # State
             m_set = re.match(r"set\s+(\w+)\s*=\s*(.*)", stripped_ln)
             # Control Flow
-            m_call = re.match(r"call\s+(\w+)\s*\(\s*\)", stripped_ln)
             m_if = re.match(r"if\s+(.*):", stripped_ln)
             m_while = re.match(r"while\s+(.*):", stripped_ln)
             m_repeat = re.match(r"repeat\s+(\d+)\s+times:", stripped_ln)
             m_loop = re.match(r"loop:", stripped_ln)
-            m_wait = re.match(r"wait\s+until\s+(.*)", stripped_ln)
+            m_call = re.match(r"call\s+(\w+)\s*\(([^)]*)\)", stripped_ln)
+            if m_call:
+                call_name = m_call.group(1)
+                arg_str = m_call.group(2).strip()
+                args = [a.strip() for a in arg_str.split(",") if a.strip()] if arg_str else []
+                steps_list.append({
+                    'cmd': 'call',
+                    'val': {'name': call_name, 'args': args},
+                    'indent': current_indent,
+                    'line': line_num
+                })
 
-            if m_act:
+            if stripped_ln == "else:":
+                steps_list.append({'cmd': 'else', 'val': None, 'indent': current_indent, 'line': line_num})
+            elif m_act:
                 steps_list.append({'cmd': 'activate', 'val': m_act.group(1), 'indent': current_indent, 'line': line_num})
             elif m_deact:
                 steps_list.append({'cmd': 'deactivate', 'val': m_deact.group(1), 'indent': current_indent, 'line': line_num})
             elif m_delay:
                 steps_list.append({'cmd': 'delay', 'val': m_delay.group(1), 'indent': current_indent, 'line': line_num})
             elif m_pulse:
-                # Value is a tuple: (output_name, duration_ticks)
                 steps_list.append({'cmd': 'pulse', 'val': (m_pulse.group(1), int(m_pulse.group(2))), 'indent': current_indent, 'line': line_num})
             elif m_set:
-                # Value is a tuple: (var_name, value_string)
                 steps_list.append({'cmd': 'set', 'val': (m_set.group(1), m_set.group(2).strip()), 'indent': current_indent, 'line': line_num})
             elif m_call:
-                steps_list.append({'cmd': 'call', 'val': m_call.group(1), 'indent': current_indent, 'line': line_num})
+                # Already handled above
+                pass
             elif m_if:
-                # Value is the condition string
-                steps_list.append({'cmd': 'if_start', 'val': m_if.group(1).strip(), 'indent': current_indent, 'line': line_num})
+                steps_list.append({'cmd': 'if_start', 'val': m_if.group(1), 'indent': current_indent, 'line': line_num})
             elif m_while:
-                steps_list.append({'cmd': 'while_start', 'val': m_while.group(1).strip(), 'indent': current_indent, 'line': line_num})
+                steps_list.append({'cmd': 'while_start', 'val': m_while.group(1), 'indent': current_indent, 'line': line_num})
             elif m_repeat:
-                # Value is the number of repetitions
                 steps_list.append({'cmd': 'repeat_start', 'val': int(m_repeat.group(1)), 'indent': current_indent, 'line': line_num})
             elif m_loop:
                 steps_list.append({'cmd': 'loop_start', 'val': None, 'indent': current_indent, 'line': line_num})
-            elif m_wait:
-                # Value is the condition string
-                steps_list.append({'cmd': 'wait', 'val': m_wait.group(1).strip(), 'indent': current_indent, 'line': line_num})
-            elif stripped_ln: # Catch other non-empty lines inside functions
-                 warnings.append(f"L{line_num}: Unrecognized statement in function '{current_function}': {ln}")
+            else:
+                warnings.append(f"L{line_num}: Unexpected statement: {ln}")
 
-        elif stripped_ln: # Non-empty line outside function and not a declaration
-             warnings.append(f"L{line_num}: Unexpected statement: {ln}")
-
-    # Print warnings if any
+    # Optionally print syntax warnings
     for warning in warnings:
-        print(f"Syntax Warning: {warning}", file=sys.stderr) # Print warnings to stderr
+        print(f"Syntax Warning: {warning}", file=sys.stderr)
 
-    return parsed_program 
+    return parsed_program

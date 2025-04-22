@@ -1,0 +1,26 @@
+# Example: Using all logic gates to move a block with Redstone
+# This script demonstrates AND, OR, NOT, and XOR gates from the standard library.
+# It assumes a world where activating 'piston1', 'piston2', etc. moves a block.
+
+import "../libraries/gates.dust"
+
+# Define inputs
+input a, b
+
+# Define outputs (these could be pistons or lamps in the world)
+output piston_and, piston_or, piston_not, piston_xor
+
+# Use AND gate: piston_and activates only if both a and b are on
+call and_gate(a, b, piston_and)
+
+# Use OR gate: piston_or activates if either a or b is on
+call or_gate(a, b, piston_or)
+
+# Use NOT gate: piston_not activates if a is off
+call not_gate(a, piston_not)
+
+# Use XOR gate: piston_xor activates if exactly one of a or b is on
+call xor_gate(a, b, piston_xor)
+
+# (Optional) You can add comments or print statements if supported by the interpreter
+# print "Activate input levers a and b to see the pistons respond to each gate!"

@@ -4,7 +4,7 @@
 
 CoralSnake is a simple Domain Specific Language (DSL) designed to describe Redstone logic in Minecraft. The goal is to write `.dust` files using CoralSnake syntax, and eventually have an interpreter generate step-by-step build instructions or schematics for the described contraption.
 
-## Current Status (v0.3 - Parser)
+## Current Status (v0.4 - Parser)
 
 *   **Parsing:** The interpreter (`coral_interpreter.py`) can currently parse `.dust` files written using the defined syntax. It understands inputs, outputs, variables, function definitions, and various control flow/action statements (loops, conditions, delays, etc.).
 *   **Structure Output:** Running the interpreter prints a structured view of the parsed program, showing indentation and the sequence of commands.
