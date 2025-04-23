@@ -1,69 +1,109 @@
-# Syntax Reference for CoralSnake
+# CoralSnake Syntax Reference
 
-## File Suffix
-.dust     # CoralSnake source files
+This file provides an overview of the syntax used in CoralSnake `.dust` scripts. It is intended as a quick-access reference for developers.
+
+## File Type
+`.dust` — CoralSnake source files
 
 ## Comments
+```dust
 # Anything after `#` is ignored (full-line or end-of-line comments)
+```
 
-## Imports (Top-Level)
-`import "<relative/path/to/file.dust>"`
+<details>
+<summary><strong>Imports</strong></summary>
+
+```dust
+import "<relative/path/to/file.dust>"
 # Inline another .dust file; supports nested imports, error on circular import
+```
+</details>
 
-## Top-Level Declarations
-`input <name>[, <name>…]`        # Declare one or more input signals
-`output <name>[, <name>…]`       # Declare one or more output signals
-`var <name> [= <initial_value>]` # Declare global variables (optional initial value)
+<details>
+<summary><strong>Top-Level Declarations</strong></summary>
 
-## Top-Level Calls
-`call <function_name>(<expr>[, <expr>…])`  # Execute a function at script entry
+```dust
+input <name>[, <name>…]        # Declare one or more input signals
+output <name>[, <name>…]       # Declare one or more output signals
+var <name> [= <initial_value>] # Declare global variables (optional initial value)
+```
+</details>
 
-## Function Definitions
-`def <snake_case_identifier>([<param>[, <param>…]]):`
+<details>
+<summary><strong>Top-Level Calls</strong></summary>
+
+```dust
+call <function_name>(<expr>[, <expr>…])  # Execute a function at script entry
+```
+</details>
+
+<details>
+<summary><strong>Function Definitions</strong></summary>
+
+```dust
+def <snake_case_identifier>([<param>[, <param>…]]):
     # Define a function with zero or more parameters
     # Function body is indented statements
+```
+</details>
 
-## Statements (inside functions)
+<details>
+<summary><strong>Statements (Inside Functions)</strong></summary>
 
 ### Control Flow
-`if <boolean expression>:`
+```dust
+if <boolean expression>:
     # Execute indented block if true
-`else:`
+else:
     # Execute indented block if the `if` condition was false
-`while <boolean expression>:`
+while <boolean expression>:
     # Repeat indented block while true
-`repeat <integer> times:`
+repeat <integer> times:
     # Repeat indented block N times
-`loop:`
+loop:
     # Infinite loop of the indented block
+```
 
 ### Function Calls
-`call <function_name>([<expr>[, <expr>…]])`  # Invoke another defined function
+```dust
+call <function_name>([<expr>[, <expr>…]])  # Invoke another defined function
+```
 
 ### Actions
-`activate(<output_name>)`         # Turn an output ON
-`deactivate(<output_name>)`       # Turn an output OFF
-`delay(<expr>)`                   # Pause execution for N ticks (`<expr>` is a variable or integer literal)
-`pulse(<output_name>, <integer>)` # Activate output, wait N ticks, then deactivate
+```dust
+activate(<output_name>)         # Turn an output ON
+deactivate(<output_name>)       # Turn an output OFF
+delay(<expr>)                   # Pause execution for N ticks
+pulse(<output_name>, <integer>) # Activate, wait, then deactivate
+```
 
 ### State Manipulation
-`set <name> = <value>`            # Assign a value (literal or variable) to a variable
-
-## Expressions (Boolean and Values)
+```dust
+set <name> = <value>            # Assign a value to a variable
 ```
-<expr> ::= <name> | <integer> | "<string>"        # Literals and variable names
+</details>
+
+<details>
+<summary><strong>Expressions</strong></summary>
+
+```dust
+<expr> ::= <name> | <integer> | "<string>"
          | not <expr>
          | <expr> and <expr>
          | <expr> or <expr>
-         | <expr> == <expr> | <expr> != <expr>      # Equality
-         | <expr> > <expr> | <expr> < <expr>        # Comparison
+         | <expr> == <expr> | <expr> != <expr>
+         | <expr> > <expr> | <expr> < <expr>
          | <expr> >= <expr> | <expr> <= <expr>
 ```
+</details>
 
-## Notes
+<details>
+<summary><strong>Notes</strong></summary>
+
 - Indentation **must** use 4 spaces; it is significant for block structure.
 - Top-level `call` statements are grouped into an implicit `__main__` function when parsing.
 - `else:` is supported immediately after an `if` block; `elif` is not yet implemented.
 - The `wait until <expr>` syntax is currently not implemented.
 - Parameterized functions and argument passing allow for reusable standard libraries (e.g., logic gates).
 - Execution notes (via `analyze_execution`) display function signatures and call arguments but do not yet simulate full state/timing.
+</details>
